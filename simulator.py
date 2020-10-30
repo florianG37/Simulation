@@ -26,7 +26,7 @@ class arrivalQueueC:
         global numberBusesQueueC
         numberBusesQueueC += 1
         if not statusControlCentre:
-            billBook.append(accessControl, dateSimulation)
+            billBook.append((accessControl, dateSimulation))
 
 
 class accessControl:
@@ -34,7 +34,7 @@ class accessControl:
         global numberBusesQueueC, statusControlCentre
         numberBusesQueueC -= 1
         statusControlCentre = True
-        billBook.append(departureControl, dateSimulation + uniform(1 / 4, 13 / 12))
+        billBook.append((departureControl, dateSimulation + uniform(1 / 4, 13 / 12)))
 
 
 class departureControl:
@@ -42,9 +42,9 @@ class departureControl:
         global statusControlCentre
         statusControlCentre = False
         if numberBusesQueueC > 0:
-            billBook.append(accessControl, dateSimulation)
+            billBook.append((accessControl, dateSimulation))
         if random() < 0.3:
-            billBook.append(arrivalQueueR, dateSimulation)
+            billBook.append((arrivalQueueR, dateSimulation))
 
 
 class arrivalQueueR:
@@ -53,7 +53,7 @@ class arrivalQueueR:
         numberBusesQueueR += 1
         numberBusesRepaired += 1
         if positionsRepairCentre < 2:
-            billBook.append(accessRepair, dateSimulation)
+            billBook.append((accessRepair, dateSimulation))
 
 
 class accessRepair:
@@ -61,7 +61,7 @@ class accessRepair:
         global numberBusesQueueR, positionsRepairCentre
         numberBusesQueueR -= 1
         positionsRepairCentre += 1
-        billBook.append(departureRepair, dateSimulation + uniform(2.1, 4.5))
+        billBook.append((departureRepair, dateSimulation + uniform(2.1, 4.5)))
 
 
 class departureRepair:
@@ -69,7 +69,7 @@ class departureRepair:
         global positionsRepairCentre
         positionsRepairCentre -= 1
         if numberBusesQueueR > 0:
-            billBook.append(accessRepair, dateSimulation)
+            billBook.append((accessRepair, dateSimulation))
 
 
 class start:
@@ -102,13 +102,12 @@ def updating_areas(date1, date2):
     areaNumberBusesQueueR += (date2 - date1) * numberBusesQueueR
     areaPositionsRepairCentre += (date2 - date1) * positionsRepairCentre
 
-
 dateSimulation = 0
 billBook.append((start, dateSimulation))
 while billBook:
+    billBook.sort(key = lambda date: date[1]) 
     eventDate = billBook[0]	
     del billBook[0]
     updating_areas(dateSimulation, eventDate[1])
     dateSimulation = eventDate[1]
-    print(eventDate[0])
     eventDate[0].execute()
