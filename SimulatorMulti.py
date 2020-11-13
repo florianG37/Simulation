@@ -96,9 +96,15 @@ class end:
     def execute():
         global averageWaitingTimeControl, averageWaitingTimeRepair, rateUseRepair, averageSizeControlQueue, averageSizeRepairQueue
         billBook.clear()
-        averageWaitingTimeControl = areaNumberBusesQueueC / numberBuses
+        try: 
+            averageWaitingTimeControl = areaNumberBusesQueueC / numberBuses
+        except ZeroDivisionError:
+            averageWaitingTimeControl = 0
         averageSizeControlQueue = areaNumberBusesQueueC / timeSimulation
-        averageWaitingTimeRepair = areaNumberBusesQueueR / numberBusesRepaired
+        try : 
+            averageWaitingTimeRepair = areaNumberBusesQueueR / numberBusesRepaired
+        except ZeroDivisionError:
+            averageWaitingTimeRepair = 0
         averageSizeRepairQueue = areaNumberBusesQueueR / timeSimulation
         rateUseRepair = areaPositionsRepairCentre / (2 * timeSimulation)
 	
@@ -126,9 +132,10 @@ def export_result_to_txt():
         fic.write('Echéancier de la simulation : {}\n\n'.format(billBookExport))
 		
 def export_final_result_to_txt():
-    global fileName, repeatSimulation, listNumberBuses, listNumberBusesRepaired, listNumberBusesQueueC, listNumberBusesQueueR, listAverageWaitingTimeControl, listAverageWaitingTimeRepair, listRateUserRepair
+    global fileName, timeSimulation, repeatSimulation, listNumberBuses, listNumberBusesRepaired, listNumberBusesQueueC, listNumberBusesQueueR, listAverageWaitingTimeControl, listAverageWaitingTimeRepair, listRateUserRepair
     with open(fileName,"a+") as fic :
         fic.write('Nombre de répétition de la simulation : {}\n'.format(repeatSimulation))
+        fic.write('Temps de simulation : {}\n'.format(timeSimulation))
         
         fic.write('Nombre de bus entrées pour chaque simulation : {}\n'.format(listNumberBuses))
         fic.write('Nombre de bus réparés pour chaque simulation : {}\n'.format(listNumberBusesRepaired))
@@ -159,8 +166,8 @@ def add_result_to_lists():
     listRateUserRepair.append(rateUseRepair)
 
 #Paramètres de la simulation
-repeatSimulation = 50
-timeSimulation = 160
+repeatSimulation = 500
+timeSimulation = 40
 
 #initialisation des variables de la simulation
 dateSimulation = 0
@@ -205,7 +212,7 @@ for i in range(0, repeatSimulation):
         updating_areas(dateSimulation, eventDate[1])
         dateSimulation = eventDate[1]
         eventDate[0].execute()
-    export_result_to_txt()
+    # export_result_to_txt()
     add_result_to_lists()
     print("Simulation n°{}".format(i))
 export_final_result_to_txt()
