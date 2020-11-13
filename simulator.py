@@ -1,25 +1,6 @@
 from random import uniform, random, expovariate
 from pathlib import Path
-
-dateSimulation = 0
-timeSimulation = 160
-numberBuses = 0
-numberBusesRepaired = 0
-areaNumberBusesQueueC = 0
-areaNumberBusesQueueR = 0
-areaPositionsRepairCentre = 0
-numberBusesQueueC = 0
-numberBusesQueueR = 0
-statusControlCentre = False
-positionsRepairCentre = 0
-averageWaitingTimeControl = 0
-averageWaitingTimeRepair = 0
-rateUseRepair = 0
-billBook = []
-
-#Variables pour l'export
-fileName = "SimulatorRepairCenter.txt"
-billBookExport = []
+from time import sleep
 
 class arrivalBus:
     def execute():
@@ -109,41 +90,73 @@ class start:
         billBook.append((arrivalBus, dateSimulation + expovariate(1/2)))
         billBook.append((end, timeSimulation))
 		
-    def __str__(self):
+    def to_string():
         return "Debut"
 
 class end:
     def execute():
-        global averageWaitingTimeControl, averageWaitingTimeRepair, rateUseRepair
+        global averageWaitingTimeControl, averageWaitingTimeRepair, rateUseRepair, averageSizeControlQueue, averageSizeRepairQueue
         billBook.clear()
-        averageWaitingTimeControl = areaNumberBusesQueueC / numberBuses
-        averageWaitingTimeRepair = areaNumberBusesQueueR / numberBusesRepaired
+        try: 
+            averageWaitingTimeControl = areaNumberBusesQueueC / numberBuses
+        except ZeroDivisionError:
+            averageWaitingTimeControl = 0
+        averageSizeControlQueue = areaNumberBusesQueueC / timeSimulation
+        try : 
+            averageWaitingTimeRepair = areaNumberBusesQueueR / numberBusesRepaired
+        except ZeroDivisionError:
+            averageWaitingTimeRepair = 0
+        averageSizeRepairQueue = areaNumberBusesQueueR / timeSimulation
         rateUseRepair = areaPositionsRepairCentre / (2 * timeSimulation)
 	
     def __str__(self):
-        return 'Fin'
-
-def export_result_to_txt():
-	global fileName, timeSimulation, numberBuses, numberBusesRepaired, numberBusesQueueC, numberBusesQueueR, averageWaitingTimeControl, averageWaitingTimeRepair, rateUseRepair, billBookExport
-	with open(fileName,"a+") as fic :
-		fic.write('Durée de la simulation : {}\n'.format(timeSimulation))
-		fic.write('Nombre de bus entrées : {}\n'.format(numberBuses))
-		fic.write('Nombre de bus réparés : {}\n'.format(numberBusesRepaired))
-		fic.write('Nombre de bus file controle : {}\n'.format(numberBusesQueueC))
-		fic.write('Nombre de bus file réparation : {}\n'.format(numberBusesQueueR))
-		fic.write('Temps moyen attente file controle : {}\n'.format(averageWaitingTimeControl))
-		fic.write('Temps moyen attente file réparation : {}\n'.format(averageWaitingTimeRepair))
-		fic.write('Taux d\'utilisation du centre de réparation : {}\n'.format(rateUseRepair))
-		fic.write('Echéancier de la simulation : {}\n\n'.format(billBookExport))
- 
+        return "Fin"
 
 def updating_areas(date1, date2):
     global areaNumberBusesQueueC, areaNumberBusesQueueR, areaPositionsRepairCentre
     areaNumberBusesQueueC += (date2 - date1) * numberBusesQueueC
     areaNumberBusesQueueR += (date2 - date1) * numberBusesQueueR
     areaPositionsRepairCentre += (date2 - date1) * positionsRepairCentre
+	
+def export_result_to_txt():
+    global fileName, timeSimulation, numberBuses, numberBusesRepaired, numberBusesQueueC, numberBusesQueueR, averageWaitingTimeControl, averageWaitingTimeRepair, rateUseRepair, billBookExport
+    with open(fileName,"a+") as fic :
+        fic.write('Durée de la simulation : {}\n'.format(timeSimulation))
+        fic.write('Nombre de bus entrées : {}\n'.format(numberBuses))
+        fic.write('Nombre de bus réparés : {}\n'.format(numberBusesRepaired))
+        fic.write('Temps moyen attente file controle : {}\n'.format(averageWaitingTimeControl))
+        fic.write('Taille moyenne file controle : {}\n'.format(averageSizeControlQueue))
+        fic.write('Temps moyen attente file réparation : {}\n'.format(averageWaitingTimeRepair))
+        fic.write('Taille moyenne file réparation : {}\n'.format(averageSizeRepairQueue))
+        fic.write('Taux d\'utilisation du centre de réparation : {}\n'.format(rateUseRepair))
+        fic.write('Echéancier de la simulation : {}\n\n'.format(billBookExport))
+		
 
+#Paramètres de la simulation
+timeSimulation = 240
+
+#initialisation des variables de la simulation
 dateSimulation = 0
+numberBuses = 0
+numberBusesRepaired = 0
+areaNumberBusesQueueC = 0
+areaNumberBusesQueueR = 0
+areaPositionsRepairCentre = 0
+numberBusesQueueC = 0
+numberBusesQueueR = 0
+statusControlCentre = False
+positionsRepairCentre = 0
+averageWaitingTimeControl = 0
+averageSizeRepairQueue = 0
+averageWaitingTimeRepair = 0
+averageSizeRepairQueue = 0
+rateUseRepair = 0
+billBook = []
+
+#Variables pour l'export
+fileName = "SimulatorRepairCenter.txt"
+billBookExport = []
+
 billBook.append((start, dateSimulation))
 while billBook:
     billBook.sort(key = lambda date: date[1]) 
